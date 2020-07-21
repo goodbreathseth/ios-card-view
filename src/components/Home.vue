@@ -1,5 +1,5 @@
 <template>
-  <div class="hello">
+  <div>
     <img @click="showDrawer = !showDrawer" alt="Vue logo" src="@/assets/logo.png" class="mx-auto"/>
 
     <h1>{{ msg }}</h1>
@@ -87,8 +87,7 @@
     </ul>
 
     <Drawer v-if="showDrawer" 
-      @close="showDrawer = false" 
-      position="bottom">
+      @close="showDrawer = false">
 
     </Drawer>
 

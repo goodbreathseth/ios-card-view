@@ -1,20 +1,22 @@
 <template>
-    <div class="container fixed top-0 bottom-0 left-0 right-0 bg-black bg-opacity-25 overflow-y-auto">
-        <div id="1" class="h-2/5-screen w-full bg-green-400" @click="$emit('close')"></div>
-        <div id="2" class="h-2/5-screen w-full bg-red-300" @click="$emit('close')"></div>
+    <div ref="container" :style="getHeight(1)" :class="getOpacity" class="container fixed top-0 left-0 right-0 bg-black bg-opacity-25 overflow-y-scroll transition-opacity duration-300">
+        <div ref="0" class=" w-full" :style="getHeight(.2)" @click="$emit('close')"></div>
+        <div ref="1" class=" w-full" :style="getHeight(.4)" @click="$emit('close')"></div>
+        <div ref="2" class=" w-full" :style="getHeight(.4)" @click="$emit('close')"></div>
         <!-- White drawer -->
-        <div class="h-11/12-screen bg-white">
+        <div ref="3" class="h-11/12-screen bg-white rounded-t-lg shadow-lg">
 
             <!-- Grey drag bar -->
-            <button @click="scroll(1)" class="p-3">
+            <button ref="btn" id="btn" @click="scroll(3)" class="p-3">
                 <div class="bg-gray-300 h-2 w-20 rounded-full shadow-sm"></div>
             </button>
 
             <!-- Content of drawer -->
-            <div id="3" class="bg-orange-300 overflow-y-auto">
+            <div ref="content" class="bg-orange-300 overflow-y-auto">
 
             </div>
         </div>
+
     </div>
 </template>
 
@@ -26,23 +28,64 @@ export default {
             default: 'middle',
         }
     },
+    data: function () {
+        return {
+            drawerMounted: false,
+            windowHeight: window.innerHeight,
+        }
+    },
     mounted() {
-        if (this.position === 'top')
-            this.scroll(3);
-        else if (this.position == 'bottom')
-            this.scroll(1);
-        else
-            this.scroll(2);
+        this.drawerMounted = true;
+        
+        let view = this;
+        setTimeout(() => {
+            // Scrolls to wherever the parent component defines where it should go
+            this.$refs[1].scrollIntoView();
+            if (this.position === 'top')
+                this.scroll(3);
+            else if (this.position == 'bottom')
+                this.scroll(1);
+            else
+                this.scroll(2);
+
+
+            // Set observer for the visibility of button
+            let observer = new IntersectionObserver((entries) => {
+                if(entries[0].intersectionRatio === 0)
+                    view.$emit('close');
+                else
+                    console.log('second')
+
+                // if(entries[0].intersectionRatio !== 1)
+                //     view.$emit('close');
+            }, { threshold: .00001 });
+    
+            observer.observe(view.$refs[3]);
+        }, 200);
+    },
+    beforeDestroy() {
+        // document.exitFullscreen();
+    },
+    computed: {
+        getOpacity() {
+            if (this.drawerMounted) 
+                return 'opacity-100'
+            else
+                return 'opacity-0'
+        }
     },
     methods: {
         scroll(elemId) {
-            console.log("scrollNum:", elemId)
-            console.log('position:', this.position)
-            document.getElementById(elemId).scrollIntoView({ 
+            this.$refs[elemId].scrollIntoView({ 
                 behavior: 'smooth' 
             });
         },
-        
+        togglePosition() {
+
+        },
+        getHeight(percent) {
+            return `height: ${this.windowHeight * percent}px;`
+        },
     }
 }
 </script>
@@ -50,7 +93,7 @@ export default {
 <style scoped>
 .container {
     scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
+    /* scroll-behavior: smooth; */
 }
 
 .container > div {
