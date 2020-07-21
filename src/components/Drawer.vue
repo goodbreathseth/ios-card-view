@@ -7,13 +7,13 @@
         <div ref="3" class="h-11/12-screen bg-white rounded-t-lg shadow-lg">
 
             <!-- Grey drag bar -->
-            <button ref="btn" id="btn" @click="scroll(3)" class="p-3">
-                <div class="bg-gray-300 h-2 w-20 rounded-full shadow-sm"></div>
+            <button ref="btn" id="btn" @click="scroll(3)" class="py-2 px-5 focus:outline-none">
+                <div class="bg-gray-300 h-2 w-12 rounded-full shadow-sm"></div>
             </button>
 
             <!-- Content of drawer -->
             <div ref="content" class="bg-orange-300 overflow-y-auto">
-                Content
+                
             </div>
         </div>
 
@@ -50,17 +50,15 @@ export default {
         let view = this;
         setTimeout(() => {
 
-
             // Set observer for the visibility of button
             let observer = new IntersectionObserver((entries) => {
                 if(entries[0].intersectionRatio <= .01) {
                     console.log('Closing')
                     view.$emit('close');
                 }
-
             }, { threshold: .01 });
-    
             observer.observe(view.$refs[3]);
+            
         }, 200);
     },
     computed: {
@@ -98,6 +96,16 @@ export default {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+
+/* 
+.element::-webkit-scrollbar { width: 0 !important }
+.element { overflow: -moz-scrollbars-none; }
+.element { -ms-overflow-style: none; }
+
+
+ */
+
 
 .container > div {
     scroll-snap-align: start;
