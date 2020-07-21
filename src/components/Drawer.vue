@@ -1,22 +1,34 @@
+<!-- 
+    Draggable drawer
+
+    @props
+        position - values: 'top', 'middle', 'bottom'
+
+    Example usage:
+    <Drawer v-if="showDrawer" @close="showDrawer = false">
+        <div>
+          Content
+        </div>
+    </Drawer>
+ -->
 <template>
-    <div ref="container" :style="getHeight(1)" class="container fixed top-0 left-0 right-0 bg-black bg-opacity-25 overflow-y-scroll">
-        <div ref="0" class=" w-full" :style="getHeight(.2)" @click="$emit('close')"></div>
-        <div ref="1" class=" w-full" :style="getHeight(.4)" @click="$emit('close')"></div>
-        <div ref="2" class=" w-full" :style="getHeight(.4)" @click="$emit('close')"></div>
+    <div ref="container" :style="getHeight(1)" :class="getOpacity" class="container fixed top-0 left-0 right-0 bg-black bg-opacity-25 overflow-y-scroll transition-opacity duration-500">
+        <div ref="0" class=" w-full" :style="getHeight(.2)" @click="close()"></div>
+        <div ref="1" class=" w-full" :style="getHeight(.4)" @click="close()"></div>
+        <div ref="2" class=" w-full" :style="getHeight(.4)" @click="close()"></div>
         <!-- White drawer -->
-        <div ref="3" class="h-11/12-screen bg-white rounded-t-lg shadow-lg">
+        <div ref="3" class="h-11/12-screen bg-white rounded-t-xl shadow-lg">
 
             <!-- Grey drag bar -->
-            <button ref="btn" id="btn" @click="scroll(3)" class="py-2 px-5 focus:outline-none">
+            <button ref="btn" id="btn" @click="scroll(3)" class="py-2 px-5 mb-4 focus:outline-none">
                 <div class="bg-gray-300 h-2 w-12 rounded-full shadow-sm"></div>
             </button>
 
             <!-- Content of drawer -->
-            <div ref="content" class="bg-orange-300 overflow-y-auto">
-                
+            <div ref="content" class="h-full bg-white overflow-y-auto">
+                <slot></slot>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -31,21 +43,22 @@ export default {
     data: function () {
         return {
             windowHeight: window.innerHeight,
+            visible: false,
         }
     },
     mounted() {
         // Scrolls to wherever the parent component defines where it should go
-        this.$nextTick(function () {
-            // Code that will run only after the
-            // entire view has been rendered
-            this.$refs[1].scrollIntoView();
-            if (this.position === 'top')
-                this.scroll(3);
-            else if (this.position == 'bottom')
-                this.scroll(1);
-            else
-                this.scroll(2);
-        })
+            setTimeout(() => {
+                this.visible = true;
+                this.$refs[1].scrollIntoView();
+                if (this.position === 'top')
+                    this.scroll(3);
+                else if (this.position == 'bottom')
+                    this.scroll(1);
+                else
+                    this.scroll(2);
+                
+            }, 50);
         
         let view = this;
         setTimeout(() => {
@@ -53,17 +66,27 @@ export default {
             // Set observer for the visibility of button
             let observer = new IntersectionObserver((entries) => {
                 if(entries[0].intersectionRatio <= .01) {
-                    console.log('Closing')
                     view.$emit('close');
                 }
             }, { threshold: .01 });
             observer.observe(view.$refs[3]);
-            
+
+
         }, 200);
     },
     computed: {
+        getOpacity() {
+            if (this.visible) {
+                return 'opacity-100'
+            }
+            else
+                return 'opacity-0'
+        },
     },
     methods: {
+        close() {
+            this.$emit('close')
+        },
         scroll(elemId) {
             this.$refs[elemId].scrollIntoView({ 
                 behavior: 'smooth' 
@@ -81,31 +104,18 @@ export default {
 
 <style scoped>
 .container {
-    scroll-snap-type: y mandatory;
     /* scroll-behavior: smooth; */
-    
+    scroll-snap-type: y mandatory;
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
 .container::-webkit-scrollbar {
-  display: none;
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    display: none !important;
 }
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.container {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-
-/* 
-.element::-webkit-scrollbar { width: 0 !important }
-.element { overflow: -moz-scrollbars-none; }
-.element { -ms-overflow-style: none; }
-
-
- */
-
 
 .container > div {
     scroll-snap-align: start;
