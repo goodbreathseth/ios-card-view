@@ -1,5 +1,5 @@
 <template>
-    <div ref="container" :style="getHeight(1)" :class="getOpacity" class="container fixed top-0 left-0 right-0 bg-black bg-opacity-25 overflow-y-scroll transition-opacity duration-300">
+    <div ref="container" :style="getHeight(1)" class="container fixed top-0 left-0 right-0 bg-black bg-opacity-25 overflow-y-scroll">
         <div ref="0" class=" w-full" :style="getHeight(.2)" @click="$emit('close')"></div>
         <div ref="1" class=" w-full" :style="getHeight(.4)" @click="$emit('close')"></div>
         <div ref="2" class=" w-full" :style="getHeight(.4)" @click="$emit('close')"></div>
@@ -13,7 +13,7 @@
 
             <!-- Content of drawer -->
             <div ref="content" class="bg-orange-300 overflow-y-auto">
-
+                Content
             </div>
         </div>
 
@@ -30,16 +30,14 @@ export default {
     },
     data: function () {
         return {
-            drawerMounted: false,
             windowHeight: window.innerHeight,
         }
     },
     mounted() {
-        this.drawerMounted = true;
-        
-        let view = this;
-        setTimeout(() => {
-            // Scrolls to wherever the parent component defines where it should go
+        // Scrolls to wherever the parent component defines where it should go
+        this.$nextTick(function () {
+            // Code that will run only after the
+            // entire view has been rendered
             this.$refs[1].scrollIntoView();
             if (this.position === 'top')
                 this.scroll(3);
@@ -47,32 +45,25 @@ export default {
                 this.scroll(1);
             else
                 this.scroll(2);
+        })
+        
+        let view = this;
+        setTimeout(() => {
 
 
             // Set observer for the visibility of button
             let observer = new IntersectionObserver((entries) => {
-                if(entries[0].intersectionRatio === 0)
+                if(entries[0].intersectionRatio <= .01) {
+                    console.log('Closing')
                     view.$emit('close');
-                else
-                    console.log('second')
+                }
 
-                // if(entries[0].intersectionRatio !== 1)
-                //     view.$emit('close');
-            }, { threshold: .00001 });
+            }, { threshold: .01 });
     
             observer.observe(view.$refs[3]);
         }, 200);
     },
-    beforeDestroy() {
-        // document.exitFullscreen();
-    },
     computed: {
-        getOpacity() {
-            if (this.drawerMounted) 
-                return 'opacity-100'
-            else
-                return 'opacity-0'
-        }
     },
     methods: {
         scroll(elemId) {
@@ -94,6 +85,18 @@ export default {
 .container {
     scroll-snap-type: y mandatory;
     /* scroll-behavior: smooth; */
+    
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.container {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
 .container > div {

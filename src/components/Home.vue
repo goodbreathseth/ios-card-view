@@ -86,10 +86,12 @@
       </li>
     </ul>
 
-    <Drawer v-if="showDrawer" 
-      @close="showDrawer = false">
+    <transition name="fadeFast">
+      <Drawer v-if="showDrawer" 
+        @close="showDrawer = false">
 
-    </Drawer>
+      </Drawer>
+    </transition>
 
   </div>
 </template>
@@ -114,6 +116,17 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+/* Fade fast transition */
+.fadeFast-enter-active,
+.fadeFast-leave-active {
+  transition: opacity 0.1s ease;
+}
+
+.fadeFast-enter,
+.fadeFast-leave-to {
+  opacity: 0;
+}
+
 h3 {
   margin: 40px 0 0;
 }
